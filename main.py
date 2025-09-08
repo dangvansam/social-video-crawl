@@ -1,7 +1,7 @@
 import sys
 import argparse
 from social_video_downloader import SocialVideoDownloader
-
+from loguru import logger
 
 def main():
     parser = argparse.ArgumentParser(description='Download videos and subtitles from social media platforms')
@@ -13,7 +13,7 @@ def main():
     args = parser.parse_args()
     
     if not args.url and not args.batch:
-        print("Error: Please provide a URL or a batch file")
+        logger.error("Error: Please provide a URL or a batch file")
         parser.print_help()
         sys.exit(1)
     
@@ -24,29 +24,29 @@ def main():
             with open(args.batch, 'r') as f:
                 urls = [line.strip() for line in f if line.strip()]
             
-            print(f"Processing {len(urls)} URLs from batch file...")
+            logger.info(f"Processing {len(urls)} URLs from batch file...")
             for i, url in enumerate(urls, 1):
-                print(f"\n[{i}/{len(urls)}] Processing: {url}")
+                logger.info(f"\n[{i}/{len(urls)}] Processing: {url}")
                 success = downloader.download_from_url(url)
                 if success:
-                    print(f"✓ Successfully processed: {url}")
+                    logger.success(f"✓ Successfully processed: {url}")
                 else:
-                    print(f"✗ Failed to process: {url}")
+                    logger.error(f"✗ Failed to process: {url}")
         else:
-            print(f"Processing: {args.url}")
+            logger.info(f"Processing: {args.url}")
             success = downloader.download_from_url(args.url)
             if success:
-                print(f"✓ Successfully downloaded video and subtitles")
+                logger.success(f"✓ Successfully downloaded video and subtitles")
             else:
-                print(f"✗ Failed to download content")
+                logger.error(f"✗ Failed to download content")
     
     except KeyboardInterrupt:
-        print("\n\nProcess interrupted by user")
+        logger.info("\n\nProcess interrupted by user")
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
     finally:
         downloader.close()
-        print("\nDownloader closed")
+        logger.error("\nDownloader closed")
 
 
 if __name__ == "__main__":
