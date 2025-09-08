@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python src/api.py
+    ports:
+      - "8003:8001"
+    environment:
+      - DOWNLOAD_DIR=/app/downloads
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - HATCHET_CLIENT_TOKEN=${HATCHET_CLIENT_TOKEN}
+      - HATCHET_API_URL=${HATCHET_API_URL:-https://api.hatchet.run}
+    volumes:
+      - ./download:/app/download
+      - ./logs:/app/logs
+    networks:
+      - video-network
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python src/worker.py
+    environment:
+      - DOWNLOAD_DIR=/app/downloads
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - WORKER_ID=${WORKER_ID:-1}
+      - HATCHET_CLIENT_TOKEN=${HATCHET_CLIENT_TOKEN}
+      - HATCHET_API_URL=${HATCHET_API_URL:-https://api.hatchet.run}
+    volumes:
+      - ./download:/app/download
+      - ./logs:/app/logs
+    networks:
+      - video-network
+    restart: unless-stopped
+    deploy:
+      replicas: 3  # Run 3 worker instances
+
+  nginx:
+    image: nginx:alpine
+    container_name: video-downloader-nginx
+    ports:
+      - "8004:80"
+      # - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - video-network
+    restart: unless-stopped
+
+networks:
+  video-network:
+    driver: bridge
