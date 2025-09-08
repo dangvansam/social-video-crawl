@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Downloads folder
+downloads/
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+*.vtt
+*.srt
+*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Selenium
+*.log
+geckodriver.log
+chromedriver.log
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+temp/
+tmp/
+
+# Test files
+test_urls.txt
+urls.txt
+
+.sh
+.venv
+.claude
+downloads
+chromedriver-linux64
