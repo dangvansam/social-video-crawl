@@ -1,7 +1,7 @@
 # Multi-stage build for Social Video Downloader
 FROM python:3.11-slim as builder
 
-# Install build dependencies
+# Install build dependencies and uv
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -9,14 +9,18 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     wget \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+# Copy uv files for better caching
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies with uv
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN uv sync --frozen --no-dev
 
 # Production stage
 FROM python:3.11-slim
@@ -34,7 +38,8 @@ RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 
 # Copy Python packages from builder
-COPY --from=builder /root/.local /home/appuser/.local
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /root/.cargo/bin/uv /usr/local/bin/uv
 
 # Set working directory
 WORKDIR /app
@@ -45,8 +50,8 @@ COPY --chown=appuser:appuser . .
 # Switch to non-root user
 USER appuser
 
-# Add local bin to PATH
-ENV PATH=/home/appuser/.local/bin:$PATH
+# Add venv to PATH
+ENV PATH=/app/.venv/bin:$PATH
 
 # Expose port
 EXPOSE 8001

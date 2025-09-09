@@ -5,10 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi==0.104.1",
+    "hatchet-sdk==1.17.0",
+    "fastapi",
+    "pydantic",
     "loguru==0.7.3",
-    "pydantic==2.5.0",
     "python-multipart==0.0.6",
-    "uvicorn[standard]==0.24.0",
+    "uvicorn[standard]",
     "yt-dlp>=2025.0.0",
 ]
